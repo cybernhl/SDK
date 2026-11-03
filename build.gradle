@@ -1,27 +1,11 @@
 buildscript {
     ext {
-        //Ref : https://developer.android.com/build/releases/past-releases
         agp_gradle = libs.versions.agp.get()
-        println "Type of libs.versions.agp: " + libs.versions.agp.class
-        println ">>> TYPE TEST >>> libs.versions.agp class: " + libs.versions.agp.class.name
-        kotlin_version = "1.9.25"
-        println "Show  kotlin_version  : ${kotlin_version}"
         kotlin_version = libs.versions.kotlin.asProvider().get()
-        println "Type of libs.versions.kotlin: " + libs.versions.kotlin.class
-        println ">>> TYPE TEST >>> libs.versions.kotlin class: " + libs.versions.kotlin.class.name
-        println "Show  kotlin_version  : ${kotlin_version}"
-
         navigation_version = libs.versions.androidx.navigation.get()
-
         coroutine_version = "1.6.4"
         jb_compose_version = libs.versions.jetbrains.compose.multiplatform.get()
-        println "Type of libs.versions.jetbrains.compose.multiplatform: " + libs.versions.jetbrains.compose.multiplatform.class
-        println ">>> TYPE TEST >>> libs.versions.jetbrains.compose.multiplatform class: " + libs.versions.jetbrains.compose.multiplatform.class.name
-
-        navigation_version = libs.versions.androidx.navigation.get()
     }
-
-    println "Show  fianl kotlin_version  : ${kotlin_version}"
 
     repositories {
         gradlePluginPortal()
@@ -33,11 +17,6 @@ buildscript {
         maven {
             url = uri('https://maven.pkg.jetbrains.space/public/p/compose/dev')
         }
-    }
-    dependencies {
-//        classpath "com.android.tools.build:gradle:$agp_gradle"
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
@@ -60,49 +39,22 @@ plugins {
     alias(libs.plugins.svgToCompose) apply false
 }
 
-allprojects {
-    project.tasks.findByName("run")?.let { task ->
-        if (task is JavaExec) {
-            println(">>> [afterEvaluate] 'run' task workingDir is: ${task.workingDir}")
-            println(">>> [afterEvaluate] 'run' task commandLine is: ${task.commandLine.joinToString(" ")}")
-        } else {
-            println(">>> [afterEvaluate] 'run' task found, but it's not a JavaExec task. Type: ${task::class.java.name}")
-        }
-    } ?: println(">>> [afterEvaluate] 'run' task NOT found.")
-    afterEvaluate {
-    }
-}
-
 subprojects {
     apply plugin: 'maven-publish'
 
-    afterEvaluate { project ->
-        if (project.plugins.hasPlugin('com.android.library')) {
-            android {
-                publishing {
-                    singleVariant("release")
+    tasks.matching { it.name.startsWith("publish") }.configureEach {
+        doLast {
+            def userHome = System.getProperty("user.home")
+            def mavenLocalDir = new File(userHome, ".m2/repository/com/github/cybernhl/SDK")
+            if (mavenLocalDir.exists()) {
+                mavenLocalDir.eachFileRecurse { file ->
+                    if (file.isFile() && file.name.endsWith("-metadata.jar")) {
+                        def targetFile = new File(file.parentFile, file.name.replace("-metadata.jar", ".jar"))
+                        if (!targetFile.exists()) {
+                            targetFile.bytes = file.bytes
+                        }
+                    }
                 }
-            }
-        }
-    }
-
-    tasks.matching { it.name.startsWith("publish") }.configureEach {
-        doLast {
-            def userHome = System.getProperty("user.home")
-        }
-    }
-
-    tasks.matching { it.name.startsWith("publish") }.configureEach {
-        doLast {
-            def userHome = System.getProperty("user.home")
-
-        }
-    }
-
-    configurations.all {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "org.jetbrains.kotlin") {
-                println("Kotlin dependency requested: ${requested.group}:${requested.name}:${requested.version} in project ${project.name}")
             }
         }
     }
