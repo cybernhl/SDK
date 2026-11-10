@@ -76,10 +76,14 @@ dependencyResolutionManagement {
         maven(url = "https://maven.aliyun.com/repository/public/")
         maven(url = "https://maven.aliyun.com/repository/spring/")
         maven(url = "https://maven.aliyun.com/repository/google/")
+        maven(url = "https://maven.aliyun.com/repository/grails-core/")
+        maven(url = "https://maven.aliyun.com/repository/apache-snapshots/")
         maven(url = "https://packages.jetbrains.team/maven/p/skija/maven")
     }
 }
 
 rootProject.name = "TriliveChatSDK"
 
-
+include(":sdk_core")
+include(":viewmodel")
+include(":shared")

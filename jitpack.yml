@@ -1,6 +1,10 @@
 jdk:
-  - openjdk17
+  - openjdk21
 before_install:
-  - ./gradlew --version
+  - git config --global --add safe.directory /build
+  - curl -sLO https://services.gradle.org/distributions/gradle-9.4.1-bin.zip
+  - unzip -q gradle-9.4.1-bin.zip
+  - export PATH=$PWD/gradle-9.4.1/bin:$PATH
+  - gradle --version
 install:
-  - ./gradlew publishToMavenLocal -x test
+  - gradle publishToMavenLocal
